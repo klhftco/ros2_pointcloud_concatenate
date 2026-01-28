@@ -11,12 +11,13 @@ PointcloudConcatenate::PointcloudConcatenate() : Node("pointcloud_concatenate")
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   // Initialise publishers and subscribers
-  // Queues size of 1 to only keep the most recent message
-  sub_cloud_in1_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in1_topic_, 1, std::bind(&PointcloudConcatenate::subCallbackCloudIn1, this, std::placeholders::_1));
-  sub_cloud_in2_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in2_topic_, 1, std::bind(&PointcloudConcatenate::subCallbackCloudIn2, this, std::placeholders::_1));
-  sub_cloud_in3_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in3_topic_, 1, std::bind(&PointcloudConcatenate::subCallbackCloudIn3, this, std::placeholders::_1));
-  sub_cloud_in4_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in4_topic_, 1, std::bind(&PointcloudConcatenate::subCallbackCloudIn4, this, std::placeholders::_1));
-  pub_cloud_out_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(cloud_out_topic_, 1);
+  // Use SensorDataQoS for compatibility with depth_image_proc and other sensor data sources
+  auto qos = rclcpp::SensorDataQoS();
+  sub_cloud_in1_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in1_topic_, qos, std::bind(&PointcloudConcatenate::subCallbackCloudIn1, this, std::placeholders::_1));
+  sub_cloud_in2_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in2_topic_, qos, std::bind(&PointcloudConcatenate::subCallbackCloudIn2, this, std::placeholders::_1));
+  sub_cloud_in3_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in3_topic_, qos, std::bind(&PointcloudConcatenate::subCallbackCloudIn3, this, std::placeholders::_1));
+  sub_cloud_in4_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(cloud_in4_topic_, qos, std::bind(&PointcloudConcatenate::subCallbackCloudIn4, this, std::placeholders::_1));
+  pub_cloud_out_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(cloud_out_topic_, qos);
 }
 
 // Destructor
